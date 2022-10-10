@@ -1,0 +1,41 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/TokenFarm.sol": {
+      "content": "// SPDX-License-Identifier: SEE LICENSE IN LICENSE\r\npragma solidity ^0.8.7;\r\n\r\nimport \"./Dai.sol\";\r\nimport \"./DappToken.sol\";\r\n\r\ncontract TokenFarm {\r\n    DaiToken public daiToken;\r\n    DappToken public dappToken;\r\n    address public owner;\r\n\r\n    address[] public stakers;\r\n    mapping(address => uint) public stakingBalance;\r\n    mapping(address => bool) public isStaking;\r\n    mapping(address => bool) public hasStaked;\r\n\r\n    constructor(DaiToken _daiToken, DappToken _dappToken) {\r\n        daiToken = _daiToken;\r\n        dappToken = _dappToken;\r\n        owner = msg.sender;\r\n    }\r\n\r\n    modifier onlyOwner() {\r\n        require(msg.sender == owner, \"Caller must be the owner\");\r\n        _;\r\n    }\r\n\r\n    function stake(uint256 _amount) public {\r\n        require(_amount > 0, \"Cannot stake Zero\");\r\n        daiToken.transferFrom(msg.sender, address(this), _amount);\r\n        stakingBalance[msg.sender] += _amount;\r\n        if (!hasStaked[msg.sender]) {\r\n            stakers.push(msg.sender);\r\n            hasStaked[msg.sender] = true;\r\n            isStaking[msg.sender] = true;\r\n        }\r\n    }\r\n\r\n    function issueTokens() public onlyOwner {\r\n        for (uint i = 0; i < stakers.length; i++) {\r\n            address staker = stakers[i];\r\n            uint256 balance = stakingBalance[staker];\r\n            if (balance > 0) {\r\n                dappToken.transfer(staker, balance);\r\n            }\r\n        }\r\n    }\r\n\r\n    function unstake() public {\r\n        uint256 balance = stakingBalance[msg.sender];\r\n        require(balance > 0, \"You havent staked anything\");\r\n\r\n        daiToken.transfer(msg.sender, balance);\r\n        stakingBalance[msg.sender] = 0;\r\n        isStaking[msg.sender] = false;\r\n    }\r\n}\r\n"
+    },
+    "contracts/Dai.sol": {
+      "content": "//SPDX-License-Identifier: MIT\r\n\r\npragma solidity ^0.8.0;\r\n\r\ncontract DaiToken {\r\n    string  public name = \"Mock DAI Token\";\r\n    string  public symbol = \"mDAI\";\r\n    uint256 public totalSupply = 1000000000000000000000000; // 1 million tokens\r\n    uint8   public decimals = 18;\r\n\r\n    event Transfer(\r\n        address indexed _from,\r\n        address indexed _to,\r\n        uint256 _value\r\n    );\r\n\r\n    event Approval(\r\n        address indexed _owner,\r\n        address indexed _spender,\r\n        uint256 _value\r\n    );\r\n\r\n    mapping(address => uint256) public balanceOf;\r\n    mapping(address => mapping(address => uint256)) public allowance;\r\n\r\n    constructor() {\r\n        balanceOf[msg.sender] = totalSupply;\r\n    }\r\n\r\n    function transfer(address _to, uint256 _value) public returns (bool success) {\r\n        require(balanceOf[msg.sender] >= _value);\r\n        balanceOf[msg.sender] -= _value;\r\n        balanceOf[_to] += _value;\r\n        emit Transfer(msg.sender, _to, _value);\r\n        return true;\r\n    }\r\n\r\n    function approve(address _spender, uint256 _value) public returns (bool success) {\r\n        allowance[msg.sender][_spender] = _value;\r\n        emit Approval(msg.sender, _spender, _value);\r\n        return true;\r\n    }\r\n\r\n    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {\r\n        require(_value <= balanceOf[_from]);\r\n        require(_value <= allowance[_from][msg.sender], \"Not Approved to spend tokens\");\r\n        balanceOf[_from] -= _value;\r\n        balanceOf[_to] += _value;\r\n        allowance[_from][msg.sender] -= _value;\r\n        emit Transfer(_from, _to, _value);\r\n        return true;\r\n    }\r\n}"
+    },
+    "contracts/DappToken.sol": {
+      "content": "//SPDX-License-Identifier: MIT\r\n\r\npragma solidity ^0.8.0;\r\n\r\ncontract DappToken {\r\n    string  public name = \"DApp Token\";\r\n    string  public symbol = \"DAPP\";\r\n    uint256 public totalSupply = 1000000000000000000000000; // 1 million tokens\r\n    uint8   public decimals = 18;\r\n\r\n    event Transfer(\r\n        address indexed _from,\r\n        address indexed _to,\r\n        uint256 _value\r\n    );\r\n\r\n    event Approval(\r\n        address indexed _owner,\r\n        address indexed _spender,\r\n        uint256 _value\r\n    );\r\n\r\n    mapping(address => uint256) public balanceOf;\r\n    mapping(address => mapping(address => uint256)) public allowance;\r\n\r\n    constructor() {\r\n        balanceOf[msg.sender] = totalSupply;\r\n    }\r\n\r\n    function transfer(address _to, uint256 _value) public returns (bool success) {\r\n        require(balanceOf[msg.sender] >= _value);\r\n        balanceOf[msg.sender] -= _value;\r\n        balanceOf[_to] += _value;\r\n        emit Transfer(msg.sender, _to, _value);\r\n        return true;\r\n    }\r\n\r\n    function approve(address _spender, uint256 _value) public returns (bool success) {\r\n        allowance[msg.sender][_spender] = _value;\r\n        emit Approval(msg.sender, _spender, _value);\r\n        return true;\r\n    }\r\n\r\n    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {\r\n        require(_value <= balanceOf[_from]);\r\n        require(_value <= allowance[_from][msg.sender]);\r\n        balanceOf[_from] -= _value;\r\n        balanceOf[_to] += _value;\r\n        allowance[_from][msg.sender] -= _value;\r\n        emit Transfer(_from, _to, _value);\r\n        return true;\r\n    }\r\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

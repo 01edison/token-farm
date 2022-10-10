@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Token Farm</title>
+  </head>
+  <body>
+    <div class="hstack gap-3 p-4">
+      <p id="account"></p>
+      <button id="connectButton" class="ms-auto me-3 btn btn-primary">
+        Connect
+      </button>
+    </div>
+
+    <section class="main container">
+      <table class="table table-borderless text-muted text-center">
+        <thead>
+          <tr>
+            <th>Staking Balance</th>
+            <th>Reward Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td id="stakingBalance"></td>
+            <td id="dappTokenBalance"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="card">
+        <div class="card-body">
+          <form>
+            <div class="mb-3">
+              <div class="d-flex">
+                <label for="exampleInputPassword1" class="form-label"
+                  >Stake Tokens</label
+                >
+                <span class="ms-auto me-3">Balance:</span>
+                <div id="daiTokenBalance"></div>
+              </div>
+              <input type="text" class="form-control" id="stakeInput" />
+            </div>
+            <div class="d-flex">
+              <button id="stakeBtn" class="btn btn-primary btn-block">
+                Stake
+              </button>
+              <button id="unstakeBtn" class="btn btn-primary btn-block ms-auto">
+                Unstake
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+    <script src="./index.js" type="module"></script>
+  </body>
+</html>
